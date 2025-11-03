@@ -574,9 +574,9 @@ export function InteractiveFloorsSystem({ onComplete, onExit, initialPauseTutori
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.6, duration: 0.4 }}
-                style={{ willChange: 'transform, opacity' }}
                 className="inline-flex items-center gap-3 px-6 py-3 rounded-full border-2 bg-black/50 backdrop-blur-sm"
                 style={{
+                  willChange: 'transform, opacity',
                   borderColor: currentFloorData?.threat === 'FINAL' ? '#ffffff' :
                     currentFloorData?.threat === 'EXTREME' ? '#dc2626' :
                     currentFloorData?.threat === 'CRITICAL' ? '#f97316' :

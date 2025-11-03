@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { DescentTransition } from "./DescentTransition";
-import { DataRoomGame } from "./games/DataRoomGame";
-import { MedbayGame } from "./games/MedbayGame";
-import { KitchenGame } from "./games/KitchenGame";
-import { AccountingGame } from "./games/AccountingGame";
-import { PrintRoomGame } from "./games/PrintRoomGame";
-import { SleepingPodGame } from "./games/SleepingPodGame";
-import { FinalBallroomGame } from "./games/FinalBallroomGame";
+import { ElevatorTransition } from "./ElevatorTransition";
+import { Floor7DataRoom } from "./games/Floor7DataRoom";
+import { Floor6Medbay } from "./games/Floor6Medbay";
+import { Floor5Kitchen } from "./games/Floor5Kitchen";
+import { Floor4Accounting } from "./games/Floor4Accounting";
+import { Floor3PrintingRoom } from "./games/Floor3PrintingRoom";
+import { Floor2SleepingPods } from "./games/Floor2SleepingPods";
+import { Floor1Ballroom } from "./games/Floor1Ballroom";
 
 interface ElevatorLiftInterfaceProps {
   onExitBuilding: () => void;
@@ -124,20 +124,20 @@ export function ElevatorLiftInterface({ onExitBuilding, onBackToAuthorisation }:
 
   // Show descent animation
   if (isDescending) {
-    return <DescentTransition fromFloor={descentFrom} toFloor={descentTo} onComplete={handleDescentComplete} />;
+    return <ElevatorTransition fromFloor={descentFrom} toFloor={descentTo} onComplete={handleDescentComplete} />;
   }
 
   // Show game
   if (currentGame !== null) {
     const gameElement = (() => {
       switch (currentGame) {
-        case 7: return <DataRoomGame onComplete={() => handleGameComplete(7)} onExit={handleExitGame} />;
-        case 6: return <MedbayGame onComplete={() => handleGameComplete(6)} onExit={handleExitGame} />;
-        case 5: return <KitchenGame onComplete={() => handleGameComplete(5)} onExit={handleExitGame} />;
-        case 4: return <AccountingGame onComplete={() => handleGameComplete(4)} onExit={handleExitGame} />;
-        case 3: return <PrintRoomGame onComplete={() => handleGameComplete(3)} onExit={handleExitGame} />;
-        case 2: return <SleepingPodGame onComplete={() => handleGameComplete(2)} onExit={handleExitGame} />;
-        case 1: return <FinalBallroomGame onComplete={() => handleGameComplete(1)} onExit={handleExitGame} />;
+        case 7: return <Floor7DataRoom onComplete={() => handleGameComplete(7)} onFail={() => setCurrentGame(null)} />;
+        case 6: return <Floor6Medbay onComplete={() => handleGameComplete(6)} onExit={handleExitGame} />;
+        case 5: return <Floor5Kitchen onComplete={() => handleGameComplete(5)} onExit={handleExitGame} />;
+        case 4: return <Floor4Accounting onComplete={() => handleGameComplete(4)} onExit={handleExitGame} />;
+        case 3: return <Floor3PrintingRoom onComplete={() => handleGameComplete(3)} onExit={handleExitGame} />;
+        case 2: return <Floor2SleepingPods onComplete={() => handleGameComplete(2)} onExit={handleExitGame} />;
+        case 1: return <Floor1Ballroom onComplete={() => handleGameComplete(1)} onExit={handleExitGame} />;
         default: return null;
       }
     })();
