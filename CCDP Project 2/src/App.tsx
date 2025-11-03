@@ -145,7 +145,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-white font-mono">
-      <BackgroundMusic srcList={["/audio/Steel Symphony.mp3", "/audio/Steel and Thunder.mp3", "/audio/The Last Light.mp3"]} />
+      <BackgroundMusic srcList={["/audio/Paper Wars.mp3"]} />
       {/* Digital Clock - Always visible except during interactive opening, main menu, achievements, and credits */}
       {currentPage !== 'interactive-opening' && currentPage !== 'main-menu' && currentPage !== 'achievements' && currentPage !== 'credits' && <DigitalClock />}
 
