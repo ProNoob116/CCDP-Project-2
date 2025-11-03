@@ -7,7 +7,7 @@ declare global {
 }
 
 type BackgroundMusicProps = {
-  // Put one or more tracks here; default is just Paper Wars
+  // One or more tracks; default is just Paper Wars
   srcList?: string[];
   initialVolume?: number; // 0..1
 };
@@ -17,6 +17,10 @@ type BackgroundMusicProps = {
  * - Starts after first user interaction (browser policy)
  * - Remembers on/off and volume in localStorage
  * - Ensures ONLY ONE audio element plays (singleton guard)
+ * - Exposes controls via window events:
+ *   - window.dispatchEvent(new CustomEvent('bgm:setEnabled', { detail: boolean }))
+ *   - window.dispatchEvent(new CustomEvent('bgm:setVolume', { detail: number }))
+ *   - window.dispatchEvent(new Event('bgm:toggle'))
  */
 export function BackgroundMusic({
   srcList = ["/audio/Paper Wars.mp3"],
@@ -84,7 +88,7 @@ export function BackgroundMusic({
       try {
         await audioRef.current.play();
       } catch {
-        // user can press Music On manually
+        // user can press SOUND: ON manually
       }
     };
     window.addEventListener('click', handleFirstInteraction, { once: true });
@@ -110,7 +114,6 @@ export function BackgroundMusic({
 
   const playNext = async () => {
     if (srcList.length <= 1) {
-      // Single track: restart
       if (!audioRef.current) return;
       audioRef.current.currentTime = 0;
       try { if (isEnabled) await audioRef.current.play(); } catch {}
@@ -124,51 +127,40 @@ export function BackgroundMusic({
     try { if (isEnabled) await audioRef.current.play(); } catch {}
   };
 
+  // External controls via window events
+  useEffect(() => {
+    const onSetEnabled = (e: Event) => {
+      const enabled = (e as CustomEvent<boolean>).detail;
+      setIsEnabled(Boolean(enabled));
+      if (!audioRef.current) return;
+      if (enabled) {
+        audioRef.current.play().catch(() => {});
+      } else {
+        audioRef.current.pause();
+      }
+    };
+    const onToggle = () => { void toggle(); };
+    const onSetVolume = (e: Event) => {
+      const v = (e as CustomEvent<number>).detail;
+      setVolume(Math.min(1, Math.max(0, Number(v))));
+    };
+    window.addEventListener('bgm:setEnabled', onSetEnabled as EventListener);
+    window.addEventListener('bgm:toggle', onToggle as EventListener);
+    window.addEventListener('bgm:setVolume', onSetVolume as EventListener);
+    return () => {
+      window.removeEventListener('bgm:setEnabled', onSetEnabled as EventListener);
+      window.removeEventListener('bgm:toggle', onToggle as EventListener);
+      window.removeEventListener('bgm:setVolume', onSetVolume as EventListener);
+    };
+  }, []);
+
   return (
-    <>
-      <audio
-        data-bgm="true"
-        ref={audioRef}
-        src={srcList[trackIndex]}
-        preload="auto"
-        onEnded={playNext}
-      />
-      <div
-        className="fixed bottom-4 right-4 z-50 bg-black/70 text-white border border-white/10 rounded-md px-3 py-2 backdrop-blur-sm flex items-center gap-3 shadow-lg"
-        style={{ fontFamily: 'JetBrains Mono, monospace' }}
-      >
-        <button
-          onClick={toggle}
-          className={`px-3 py-1 rounded font-bold transition-colors ${isEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}`}
-          title={isEnabled ? 'Music: On' : 'Music: Off'}
-        >
-          {isEnabled ? 'Music On' : 'Music Off'}
-        </button>
-
-        {srcList.length > 1 && (
-          <button
-            onClick={playNext}
-            className="px-2 py-1 rounded bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-bold"
-            title="Next track"
-          >
-            Next
-          </button>
-        )}
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs opacity-80">Vol</span>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={volume}
-            onChange={(e) => setVolume(Number(e.target.value))}
-            className="w-28 accent-cyan-500"
-            aria-label="Background music volume"
-          />
-        </div>
-      </div>
-    </>
+    <audio
+      data-bgm="true"
+      ref={audioRef}
+      src={srcList[trackIndex]}
+      preload="auto"
+      onEnded={playNext}
+    />
   );
 }
